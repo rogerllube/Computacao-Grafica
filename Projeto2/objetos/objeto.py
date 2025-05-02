@@ -43,15 +43,13 @@ class Objeto:
 
 
     def update_transform(self, parent_transform=glm.mat4(1.0)):
-        self.global_transform = parent_transform * self.get_local_transform()
-        
+        self.global_transform =  self.get_local_transform() * parent_transform
         for child in self.children:
             child.update_transform(self.global_transform)
 
 
     def draw(self, program):
         loc_model = glGetUniformLocation(program, "model")
-
         matrix_array = np.array(self.global_transform, dtype=np.float32)
         glUniformMatrix4fv(loc_model, 1, GL_TRUE, matrix_array)
 
@@ -59,7 +57,8 @@ class Objeto:
         glDrawArrays(GL_TRIANGLES, self.vertice_init, self.vertice_count) ## renderizando
 
         for child in self.children:
-            child.draw()
+            child.draw(program)
+
 
     def load_model(self, obj_file, texture_file):
         self.vertice_init, self.vertice_count, self.texture_id = self.loader.load_obj_and_texture(obj_file, texture_file)

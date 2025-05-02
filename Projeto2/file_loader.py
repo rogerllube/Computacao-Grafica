@@ -1,6 +1,4 @@
-import glm
 from OpenGL.GL import *
-import numpy as np
 from PIL import Image
 
 class Loader:
@@ -114,5 +112,6 @@ class Loader:
         
         ### carregando textura equivalente e definindo um id (buffer): use um id por textura!
         texture_id = self.load_texture_from_file(texture_file)
+            
         
         return verticeInicial, verticeFinal - verticeInicial, texture_id
