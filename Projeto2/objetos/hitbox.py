@@ -1,5 +1,6 @@
 import glm
 
+#classe para verificar a colisao
 class Hitbox:
     def __init__(self, pos = glm.vec3(0), radius = 0):
         self.pos = pos

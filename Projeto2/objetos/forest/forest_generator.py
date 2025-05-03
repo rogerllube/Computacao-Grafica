@@ -3,7 +3,7 @@ import random
 from ..objeto import Objeto
 from ..hitbox import Hitbox
 
-
+#armazena informacoes de cada tipo de objeto para geracao automatica
 class ForestObjectType():
     def __init__(self, loader):
         #parametros para geracao
@@ -25,13 +25,14 @@ class ForestObjectType():
 
         self.loader = loader
 
-    
+    #carrega o modelo
     def load_model(self):
         self.vertice_init, self.vertice_count, self.texture_id = self.loader.load_obj_and_texture(
             self.model_path, 
             self.texture_path
         )
 
+    #cria e inicializa 1 objeto desse tipo
     def generate(self, pos):
         obj = Objeto(self.loader)
         obj.vertice_count = self.vertice_count
@@ -48,7 +49,8 @@ class ForestObjectType():
     
         
 
-
+#gera automaticamente a floresta
+#caso ja tiver objeto na cena, adicione-o no hitbox_list
 class ForestGenerator(Objeto):
     #num_x e num_y definem quanto de tiles de grass vai renderizar
     def __init__(self, loader):
@@ -59,11 +61,11 @@ class ForestGenerator(Objeto):
         self.objTypes = []
 
         
-        #colocar os objetos
-        tree1 = ForestObjectType(loader)
-        tree1.model_path = "objetos/forest/tree.obj"
-        tree1.texture_path = "objetos/forest/forest.png"
-        self.objTypes.append(tree1)
+        #criar os models dos objetos
+        tree = ForestObjectType(loader)
+        tree.model_path = "objetos/forest/tree.obj"
+        tree.texture_path = "objetos/forest/forest.png"
+        self.objTypes.append(tree)
 
         stone = ForestObjectType(loader)
         stone.model_path = "objetos/forest/stone.obj"
@@ -74,7 +76,8 @@ class ForestGenerator(Objeto):
         self.objTypes.append(stone)
 
         
-    
+    #gera automaticamente a floresta
+    #coloque elementos ja existentes no hitbox_list
     def generate(self, hitbox_list = None):
         #inicializa os objetos
         self.children = []
@@ -118,7 +121,7 @@ class ForestGenerator(Objeto):
                     if(objType.obj_num >= objType.max_num):
                         break
             
-            #modifica o spacing
+            #modifica o spacing (spacing diferente entre objetos de tipo igual e diferente)
             for i in range(objType.obj_num):
                 self.hitbox_list[-i-1].radius = objType.dif_type_spacing
 

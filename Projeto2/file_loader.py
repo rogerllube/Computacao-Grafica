@@ -69,6 +69,8 @@ class Loader:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         img = Image.open(img_textura)
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
         img_width = img.size[0]
         img_height = img.size[1]
         image_data = img.tobytes("raw", "RGB", 0, -1)
