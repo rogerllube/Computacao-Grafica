@@ -1,5 +1,4 @@
 import glm
-from pathlib import Path
 from ..objeto import Objeto
 
 class Grass(Objeto):
@@ -14,7 +13,6 @@ class Grass(Objeto):
         self.scale = scale
         self.rotation_axis = glm.vec3(1,0,0)
         self.rotation_angle = -90
-        self.translation = glm.vec3(0,0,0)
 
         #cria os tiles de grass
         vertice_init, vertice_count, texture_id = self.loader.load_obj_and_texture(
@@ -37,5 +35,3 @@ class Grass(Objeto):
                 )
                 self.children.append(tile)
         self.update_transform()
-        for child in self.children:
-            print(child.translation)
