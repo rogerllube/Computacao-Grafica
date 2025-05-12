@@ -1,0 +1,12 @@
+# Blender 4.4.3 MTL File: 'None'
+# www.blender.org
+
+newmtl Drevo_Mat
+Ns 67.644821
+Ka 0.064516 0.064516 0.064516
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd C:/drevo-textura.jpg
