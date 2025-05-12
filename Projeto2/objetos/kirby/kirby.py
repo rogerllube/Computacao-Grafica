@@ -21,4 +21,29 @@ class Kirby(Objeto):
         self.children.append(self.feet)
 
         self.scale = glm.vec3(4)
+        self.animcycle = 0.0
+        self.grow_range = [4, 6]
+
         self.update_transform()
+
+    def grow(self, delta_time : float):
+
+        self.animcycle = (self.animcycle + delta_time)
+        min_s, max_s = self.grow_range
+        self.center = glm.vec3(0, -0.5, 0)
+
+        amp_s = (max_s - min_s) / 2.0
+        off_s = (max_s + min_s) / 2.0
+
+        bounce_scale = off_s + amp_s * math.sin(self.animcycle * 2 * math.pi)
+        self.scale = glm.vec3(bounce_scale)
+        
+
+        self.update_transform()
+
+    def stop_grow(self):
+        self.scale = glm.vec3(4)
+        self.animcycle = 0
+        self.update_transform()
+
+
