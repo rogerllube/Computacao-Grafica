@@ -11,6 +11,7 @@ class Skybox(Objeto):
         self.skybox = Objeto(loader)
         self.skybox.load_model("objetos/skybox/skybox.obj", "objetos/skybox/Texture.png")
         self.children.append(self.skybox)
+        self.group_id = 2
 
         self.scale = glm.vec3(4.5)
 

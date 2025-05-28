@@ -7,6 +7,7 @@ class Casa(Objeto):
         super().__init__(loader)
 
         self.loader = loader
+        self.group_id = 1
 
         self.paredes = Objeto(loader)
         self.paredes.load_model("objetos/casa/Paredes.obj", "objetos/casa/textures/paredes.jpeg")

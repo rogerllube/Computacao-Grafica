@@ -7,6 +7,7 @@ class Kirby(Objeto):
         super().__init__(loader)
 
         self.loader = loader
+        self.group_id = 1
 
         self.body = Objeto(loader)
         self.body.load_model("objetos/kirby/body.obj", "objetos/kirby/baking.png")

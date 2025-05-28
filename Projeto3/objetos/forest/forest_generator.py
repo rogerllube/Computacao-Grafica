@@ -13,7 +13,7 @@ class ForestObjectType():
         self.dif_type_spacing = 3 #distancia minima entre objetos de outros tipos
         self.scale = glm.vec3(2)
         self.scale_variation = 0.6
-        self.spread = [200,200]
+        self.spread = [400,400]
         self.model_path = ""
         self.texture_path = ""
 

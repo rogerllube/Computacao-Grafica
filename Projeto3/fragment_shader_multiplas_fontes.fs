@@ -1,71 +1,98 @@
-// parametros da iluminacao ambiente e difusa
-uniform vec3 lightPos1; // define coordenadas de posicao da luz #1
-uniform vec3 lightPos2; // define coordenadas de posicao da luz #2
-uniform float ka; // coeficiente de reflexao ambiente
-uniform float kd; // coeficiente de reflexao difusa
+#version 330 core
 
-// parametros da iluminacao especular
-uniform vec3 viewPos; // define coordenadas com a posicao da camera/observador
-uniform float ks; // coeficiente de reflexao especular
-uniform float ns; // expoente de reflexao especular
+out vec4 FragColor;
 
-// parametro com a cor da(s) fonte(s) de iluminacao
-vec3 lightColor1 = vec3(1.0, 1.0, 1.0);
-vec3 lightColor2 = vec3(0.0, 0.0, 1.0);
+// --- Entradas do Vertex Shader ---
+in vec2 out_texture;
+in vec3 out_normal;
+in vec3 out_fragPos;
 
-// parametros recebidos do vertex shader
-varying vec2 out_texture; // recebido do vertex shader
-varying vec3 out_normal; // recebido do vertex shader
-varying vec3 out_fragPos; // recebido do vertex shader
+// --- Struct da Luz (ATUALIZADA) ---
+struct PointLight {
+    vec3 position;
+    vec3 color;
+
+    // Intensidades individuais
+    float ambient;
+    float diffuse;
+    float specular;
+
+    // Atenuação
+    float constant;
+    float linear;
+    float quadratic;
+
+    //ID do Grupo da Luz
+    int groupID;
+
+    //Se esta aceso
+    int on;
+};
+
+// --- Constantes e Uniforms ---
+#define MAX_LIGHTS 10
+uniform PointLight lights[MAX_LIGHTS];
+uniform int numActiveLights;
+uniform vec3 viewPos;
 uniform sampler2D samplerTexture;
 
+// Uniforms de Material (enviados por objeto)
+uniform float ka;
+uniform float kd;
+uniform float ks;
+uniform float ns;
+
+//Uniforms globais editaveis com tecla
+uniform float globalAmbientLevel;
+uniform float globalDiffuseMult;
+uniform float globalSpecularMult;
+
+//ID do Grupo do Objeto
+uniform int objectGroupID;
 
 
-void main(){
 
-	// calculando reflexao ambiente
-	vec3 ambient = ka * vec3(1.0,1.0,1.0);             
+// --- Função para Calcular uma Luz (ATUALIZADA) ---
+vec3 CalcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir) {
+    vec3 lightDir = normalize(light.position - fragPos);
 
-	////////////////////////
-	// Luz #1
-	////////////////////////
-	
-	// calculando reflexao difusa
-	vec3 norm1 = normalize(out_normal); // normaliza vetores perpendiculares
-	vec3 lightDir1 = normalize(lightPos1 - out_fragPos); // direcao da luz
-	float diff1 = max(dot(norm1, lightDir1), 0.0); // verifica limite angular (entre 0 e 90)
-	vec3 diffuse1 = kd * diff1 * lightColor1; // iluminacao difusa
-	
-	// calculando reflexao especular
-	vec3 viewDir1 = normalize(viewPos - out_fragPos); // direcao do observador/camera
-	vec3 reflectDir1 = reflect(-lightDir1, norm1); // direcao da reflexao
-	float spec1 = pow(max(dot(viewDir1, reflectDir1), 0.0), ns);
-	vec3 specular1 = ks * spec1 * lightColor1;    
-	
-	
-	////////////////////////
-	// Luz #2
-	////////////////////////
-	
-	// calculando reflexao difusa
-	vec3 norm2 = normalize(out_normal); // normaliza vetores perpendiculares
-	vec3 lightDir2 = normalize(lightPos2 - out_fragPos); // direcao da luz
-	float diff2 = max(dot(norm2, lightDir2), 0.0); // verifica limite angular (entre 0 e 90)
-	vec3 diffuse2 = kd * diff2 * lightColor2; // iluminacao difusa
-	
-	// calculando reflexao especular
-	vec3 viewDir2 = normalize(viewPos - out_fragPos); // direcao do observador/camera
-	vec3 reflectDir2 = reflect(-lightDir2, norm2); // direcao da reflexao
-	float spec2 = pow(max(dot(viewDir2, reflectDir2), 0.0), ns);
-	vec3 specular2 = ks * spec2 * lightColor2;    
-	
-	////////////////////////
-	// Combinando as duas fontes
-	////////////////////////
-	
-	// aplicando o modelo de iluminacao
-	vec4 texture = texture2D(samplerTexture, out_texture);
-	vec4 result = vec4((ambient + diffuse1 + diffuse2 + specular1 + specular2),1.0) * texture; // aplica iluminacao
-	gl_FragColor = result;
+    // --- Atenuação ---
+    float distance = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
+    // --- Componentes (Usando intensidades da LUZ e coeficientes do MATERIAL) ---
+    // Ambiente
+    vec3 ambient_comp = light.ambient * light.color * ka;
+
+    // Difusa
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse_comp = light.diffuse * diff * light.color * kd * globalDiffuseMult;
+
+    // Especular
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), ns);
+    vec3 specular_comp = light.specular * spec * light.color * ks * globalSpecularMult;
+
+    // Aplica a atenuação (você pode optar por não atenuar o ambiente, se preferir)
+    return (ambient_comp + diffuse_comp + specular_comp) * attenuation;
+}
+
+// --- Shader Principal (ATUALIZADO) ---
+void main() {
+    vec3 norm = normalize(out_normal);
+    vec3 viewDir = normalize(viewPos - out_fragPos);
+    vec4 texColor = texture(samplerTexture, out_texture);
+
+    vec3 ambient_global = vec3(globalAmbientLevel);
+
+    // Acumula o efeito de todas as luzes ativas
+    vec3 light_result = vec3(0.0, 0.0, 0.0);
+    for(int i = 0; i < numActiveLights; i++) {
+        if (lights[i].groupID == objectGroupID && lights[i].on == 1) {
+            light_result += CalcPointLight(lights[i], norm, out_fragPos, viewDir);
+        }
+    }
+
+    // A cor final é o resultado acumulado das luzes, modulado pela textura
+    FragColor = vec4((ambient_global + light_result), 1.0) * texColor;
 }

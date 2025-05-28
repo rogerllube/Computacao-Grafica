@@ -43,6 +43,17 @@ class WaddleDee(Objeto):
         self.spear_edge.load_model("objetos/waddle_dee/spear_edge.obj", "objetos/waddle_dee/spear_edge.png")
         self.spear.children.append(self.spear_edge)
 
+        self.light_obj = Objeto(loader)
+        self.light_obj.translation = glm.vec3(-0.617272, 0.323451, 1.15561)
+        self.light_obj.is_light_source = True # Faz a ponta da lança ser uma luz
+        self.light_obj.light_color = glm.vec3(1.0, 0.5, 0.0) # Luz laranja
+        self.light_obj.light_diffuse = 2.4
+        self.light_obj.light_specular = 3.6
+        self.light_obj.light_ambient = 0.0
+        self.light_obj.light_linear = 0.1 # Atenuação para luz pequena
+        self.light_obj.light_quadratic = 0.1
+        self.children.append(self.light_obj)
+
 
 
 
@@ -67,8 +78,6 @@ class WaddleDee(Objeto):
         self.inicial_angle = math.radians(0) #angulo inicial em relacao a si mesmo
         self.circle_angle  = math.radians(0.0) #angulo de rotacao em relacao ao centro do circulo
         self.circle_speed  = math.radians(25.0) #degrees per second
-
-
 
 
 

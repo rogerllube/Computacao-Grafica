@@ -7,6 +7,7 @@ class Cama(Objeto):
         super().__init__(loader)
 
         self.loader = loader
+        self.group_id = 1
 
         self.estrutura = Objeto(loader)
         self.estrutura.load_model("objetos/cama/Estrutura.obj", "objetos/cama/textures/Bedwood_Colorbase_Baked-min.png")

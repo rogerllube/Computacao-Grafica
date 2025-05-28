@@ -23,6 +23,27 @@ class Objeto:
         self.vertice_init = 0
         self.vertice_count = 0
 
+        #ID do Grupo de Iluminação
+        # 0 = Externo (Padrão), 1 = Interno, 2 = Skybox, etc
+        self.group_id = 0 
+
+        # --- Parâmetros de Material (Padrão) ---
+        self.ka = 0.1  # Coeficiente ambiente
+        self.kd = 0.8  # Coeficiente difuso
+        self.ks = 0.1  # Coeficiente especular
+        self.ns = 16.0 # Expoente especular
+
+        # --- Parâmetros de Luz (se este objeto for uma fonte de luz) ---
+        self.light_on = True
+        self.light_color = glm.vec3(1.0, 1.0, 1.0)
+        self.light_ambient = 0.1
+        self.light_diffuse = 0.8
+        self.light_specular = 1.0
+        # Valores de atenuação
+        self.light_constant = 1.0
+        self.light_linear = 0.0014
+        self.light_quadratic = 0.0007
+
     #retorna a matriz de transformacao local
     #nao retorna a matriz global(matriz do pai * matriz local)
     def get_local_transform(self):
@@ -51,29 +72,30 @@ class Objeto:
     def update_transform(self, parent_transform=glm.mat4(1.0)):
         self.global_transform =  parent_transform * self.get_local_transform()
         for child in self.children:
+            child.group_id = self.group_id
             child.update_transform(self.global_transform)
+
+    def get_world_position(self) -> glm.vec3:
+        #Retorna a posição atual do objeto no espaço do mundo.
+        return glm.vec3(self.global_transform[3])
 
     #renderiza o objeto e seus filhos
     def draw(self, program):
-        ka = 1 # coeficiente de reflexao ambiente do modelo
-        kd = 0.5 # coeficiente de reflexao difusa do modelo
-        ks = 0.5 # coeficiente de reflexao especular do modelo
-        ns = 32.0 # expoente de reflexao especular
 
-        loc_model = glGetUniformLocation(program, "model")
-        
-        loc_ka = glGetUniformLocation(program, "ka") # recuperando localizacao da variavel ka na GPU
-        glUniform1f(loc_ka, ka) ### envia ka pra gpu
-        
-        loc_kd = glGetUniformLocation(program, "kd") # recuperando localizacao da variavel kd na GPU
-        glUniform1f(loc_kd, kd) ### envia kd pra gpu    
-        
-        loc_ks = glGetUniformLocation(program, "ks") # recuperando localizacao da variavel ks na GPU
-        glUniform1f(loc_ks, ks) ### envia ks pra gpu        
-        
-        loc_ns = glGetUniformLocation(program, "ns") # recuperando localizacao da variavel ns na GPU
-        glUniform1f(loc_ns, ns) ### envia ns pra gpu            
+        # Envia os parâmetros de MATERIAL deste objeto para a GPU
+        loc_ka = glGetUniformLocation(program, "ka")
+        glUniform1f(loc_ka, self.ka)
+        loc_kd = glGetUniformLocation(program, "kd")
+        glUniform1f(loc_kd, self.kd)
+        loc_ks = glGetUniformLocation(program, "ks")
+        glUniform1f(loc_ks, self.ks)
+        loc_ns = glGetUniformLocation(program, "ns")
+        glUniform1f(loc_ns, self.ns)         
+
+        glUniform1i(glGetUniformLocation(program, "objectGroupID"), self.group_id)
             
+        # Envia a matriz de modelo
+        loc_model = glGetUniformLocation(program, "model")
         matrix_array = np.array(self.global_transform, dtype=np.float32)
         glUniformMatrix4fv(loc_model, 1, GL_TRUE, matrix_array)
 

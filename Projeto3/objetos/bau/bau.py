@@ -7,6 +7,7 @@ class Bau(Objeto):
         super().__init__(loader)
 
         self.loader = loader
+        self.group_id = 1
 
         self.base = Objeto(loader)
         self.base.load_model("objetos/bau/Base.obj", "objetos/bau/OldChest.png")
