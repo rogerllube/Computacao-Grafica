@@ -7,7 +7,7 @@ in vec2 out_texture;
 in vec3 out_normal;
 in vec3 out_fragPos;
 
-// --- Struct da Luz (ATUALIZADA) ---
+// --- Struct da Luz ---
 struct PointLight {
     vec3 position;
     vec3 color;
@@ -36,7 +36,7 @@ uniform int numActiveLights;
 uniform vec3 viewPos;
 uniform sampler2D samplerTexture;
 
-// Uniforms de Material (enviados por objeto)
+// Uniforms de Material
 uniform float ka;
 uniform float kd;
 uniform float ks;
@@ -52,7 +52,7 @@ uniform int objectGroupID;
 
 
 
-// --- Função para Calcular uma Luz (ATUALIZADA) ---
+// --- Função para Calcular uma Luz ---
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
 
@@ -73,11 +73,11 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir) {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), ns);
     vec3 specular_comp = light.specular * spec * light.color * ks * globalSpecularMult;
 
-    // Aplica a atenuação (você pode optar por não atenuar o ambiente, se preferir)
+    // Aplica a atenuação
     return (ambient_comp + diffuse_comp + specular_comp) * attenuation;
 }
 
-// --- Shader Principal (ATUALIZADO) ---
+// --- Shader Principal ---
 void main() {
     vec3 norm = normalize(out_normal);
     vec3 viewDir = normalize(viewPos - out_fragPos);
